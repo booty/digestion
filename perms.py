@@ -1,34 +1,17 @@
-from typing import Sequence, TypeVar, List, TypeVar, ParamSpec, Callable
-from datetime import datetime
-from functools import wraps
 from time import perf_counter
 
 
-P = ParamSpec("P")
-R = TypeVar("R")
-T = TypeVar("T")
-
-
-def contiguous_segments(seq: Sequence[T]) -> List[Sequence[T]]:
+def contiguous_segments(seq):
     # All contiguous slices of lengths 1..len(seq).
     n = len(seq)
     return [seq[i : i + k] for k in range(1, n + 1) for i in range(n - k + 1)]
 
 
-# def multislice(seq: Sequence[T], cuts: Sequence[int]) -> List[List[T]]:
-#     n = len(seq) + 1
-#     cut_points = sorted({c for c in cuts if 0 <= c < n})
-#     boundaries = [0] + [c + 1 for c in cut_points] + [n]
-#     result = [list(seq[a:b]) for a, b in zip(boundaries, boundaries[1:])]
-#     return [x for x in result if x]  # kludge!!!!
-
-
-# This is about 20% faster than multislice()
-def multislice_fast(seq: Sequence[T], cuts: Sequence[int]) -> List[List[T]]:
+def multislice_fast(seq, cuts):
     n = len(seq)
     cut_set = {c for c in cuts if 0 <= c < n}
-    out: List[List[T]] = []
-    curr: List[T] = []
+    out = []
+    curr = []
 
     for i, x in enumerate(seq):
         curr.append(x)
@@ -42,7 +25,7 @@ def multislice_fast(seq: Sequence[T], cuts: Sequence[int]) -> List[List[T]]:
     return out
 
 
-def foo(seq: Sequence[T]) -> List[List[List[T]]]:
+def foo(seq):
     idxs = list(range(len(seq)))
     bar = contiguous_segments(idxs)
     return [multislice_fast(seq, cuts) for cuts in bar]
@@ -51,7 +34,7 @@ def foo(seq: Sequence[T]) -> List[List[List[T]]]:
 print(foo(["J", "O", "H", "N"]))
 
 
-for size in [1, 2, 3, 10, 200, 300, 400, 500]:
+for size in [1, 2, 3, 10, 100, 200, 300, 400, 500]:
     print(f"Size is {size}; calculating...")
     start_time = perf_counter()
     input_seq = list(range(1, size + 1))
